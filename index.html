@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Min Limit</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #131f24;
+            --fire-gray: #4b4b4b;
+            --fire-orange: #ff9600;
+            --fire-red: #ff4b4b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: #f5f5f5;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        h2 { font-size: 1rem; color: #666666; margin-bottom: 20px; }
+
+        .streak-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        /* The Fire Icon */
+        .fire-icon {
+            font-size: 80px;
+            filter: grayscale(1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin: 10px 0;
+            user-select: none;
+        }
+
+        .fire-active {
+            filter: grayscale(0);
+            text-shadow: 0 0 20px rgba(255, 150, 0, 0.6);
+            transform: scale(1.1);
+        }
+
+        .count {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            background: #37464f;
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:active { transform: scale(0.9); }
+        .plus-btn:hover { background: #58cc02; }
+        .redo-btn:hover { background: #ff4b4b; }
+
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>30 MIN LIMIT OF TV AND YOUTUBE</h2>
+    
+    <div id="fire" class="fire-icon">🔥</div>
+    <div class="count" id="streakText">0</div>
+
+    <div class="controls">
+        <button class="redo-btn" onclick="resetStreak()" title="Reset Streak">↺</button>
+        <button class="plus-btn" onclick="completeDay()" title="Day Complete">+</button>
+    </div>
+</div>
+
+<script>
+    let streak = parseInt(localStorage.getItem('streak')) || 0;
+    let lastCompleted = localStorage.getItem('lastCompleted') || "";
+
+    const fireIcon = document.getElementById('fire');
+    const streakText = document.getElementById('streakText');
+
+    function updateDisplay() {
+        streakText.innerText = streak;
+        
+        // Check if already completed today
+        const today = new Date().toDateString();
+        if (lastCompleted === today) {
+            fireIcon.classList.add('fire-active');
+        } else {
+            fireIcon.classList.remove('fire-active');
+        }
+    }
+
+    function completeDay() {
+        const today = new Date().toDateString();
+        
+        if (lastCompleted !== today) {
+            streak++;
+            lastCompleted = today;
+            localStorage.setItem('streak', streak);
+            localStorage.setItem('lastCompleted', lastCompleted);
+            updateDisplay();
+
+        }
+    }
+
+    function resetStreak() {
+        if (confirm("Are you sure you want to reset your streak to 0?")) {
+            streak = 0;
+            lastCompleted = "";
+            localStorage.setItem('streak', 0);
+            localStorage.setItem('lastCompleted', "");
+            updateDisplay();
+        }
+    }
+
+    // Auto-reset logic (If a day is missed)
+    function checkMissedDay() {
+        if (lastCompleted === "") return;
+
+        const today = new Date();
+        const lastDate = new Date(lastCompleted);
+        
+        // Calculate difference in days
+        const diffTime = Math.abs(today - lastDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 1) {
+            streak = 0;
+            localStorage.setItem('streak', 0);
+            updateDisplay();
+        }
+    }
+
+    checkMissedDay();
+    updateDisplay();
+</script>
+
+</body>
+</html>
